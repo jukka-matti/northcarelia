@@ -1,0 +1,22 @@
+{
+  "name": "pohjois-karjala-dashboard",
+  "version": "1.0.0",
+  "description": "Interactive visual dashboard for North Karelia development data",
+  "main": "index.html",
+  "scripts": {
+    "dev": "python -m http.server 8000",
+    "preview": "python3 -m http.server 8000"
+  },
+  "keywords": [
+    "dashboard",
+    "data-visualization",
+    "pohjois-karjala",
+    "finland",
+    "statistics"
+  ],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "pdf-parse": "^2.4.5"
+  }
+}
