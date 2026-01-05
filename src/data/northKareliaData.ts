@@ -70,20 +70,26 @@ export const storySteps = [
     {
         step: '01',
         title: 'Data-analyysi (Claude 4.5 Sonnet)',
-        desc: 'Pohjois-Karjalan liiton PDF-raportti (2025) analysoitiin tekoälyllä. Keskeiset trendit: väestön sinnikkyys, vihreä siirtymä, maahanmuutto.',
+        desc: 'Pohjois-Karjalan liiton PDF-raportti analysoitiin ensimmäisen kerran. Alkuperäinen React + Recharts -prototyyppi osoittautui epävakaaksi selainympäristössä.',
         color: '#f4a261'
     },
     {
         step: '02',
-        title: 'Konseptointi (Gemini 3 Flash)',
-        desc: 'Ensimmäinen nopea prototyyppi. Yksinkertainen HTML + SVG -ratkaisu, joka toimi "Flash"-nopeudella ilman raskaita kirjastoja.',
+        title: 'Flash-versio (Gemini 3 Flash)',
+        desc: 'Kevyt HTML + SVG -ratkaisu ilman ulkoisia kirjastoja. Nopea ja vakaa, mutta rajoitettu toiminnallisuus. Tallennettiin backup-versioksi.',
         color: '#2a9d8f'
     },
     {
         step: '03',
-        title: 'Tuotantoversio (Gemini 3 Pro)',
-        desc: 'Tämä versio. Moderni Vite + React -pohja. Framer Motion -animaatiot, Recharts-grafiikka ja täysin responsiivinen "premium" design.',
+        title: 'Pro-versio (Gemini 3 Pro)',
+        desc: 'Täysi uudelleenrakennus: Vite + React + TypeScript + Tailwind v4. Framer Motion -animaatiot, Recharts-kaaviot ja responsiivinen design.',
         color: '#4a7c59'
+    },
+    {
+        step: '04',
+        title: 'Matka-osio (Gemini 3 Pro)',
+        desc: 'Uusi visuaalinen tarina: Menneisyys, Nykytila ja Tulevaisuus. Scroll-animaatiot, kolme lukua ja kaikki raportin data visuaalisessa muodossa.',
+        color: '#8B5CF6'
     }
 ];
 
