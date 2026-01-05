@@ -87,7 +87,7 @@ export const storySteps = [
     },
     {
         step: '04',
-        title: 'Matka-osio (Gemini 3 Pro)',
+        title: 'Matka-osio (Claude Opus 4.5)',
         desc: 'Uusi visuaalinen tarina: Menneisyys, Nykytila ja Tulevaisuus. Scroll-animaatiot, kolme lukua ja kaikki raportin data visuaalisessa muodossa.',
         color: '#8B5CF6'
     }
