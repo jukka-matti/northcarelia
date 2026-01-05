@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Pohjois-Karjala - Dashboard</title>
     
-    <!-- React -->
     <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
     <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
@@ -19,103 +18,59 @@
             color: #e8f5e9; 
             font-family: 'IBM Plex Sans', sans-serif;
             min-height: 100vh;
+            overflow-y: auto;
         }
-        .container { padding: 60px 20px; max-width: 1400px; margin: 0 auto; position: relative; z-index: 1; }
+        .container { padding: 60px 20px; max-width: 1400px; margin: 0 auto; }
         .card { 
-            background: rgba(255,255,255,0.03); 
+            background: rgba(255,255,255,0.05); 
             padding: 30px; 
             border-radius: 24px; 
             margin-bottom: 24px; 
             border: 1px solid rgba(255,255,255,0.1); 
             backdrop-filter: blur(20px);
         }
-        .nav { display: flex; gap: 12px; margin-bottom: 48px; flex-wrap: wrap; }
+        .nav { display: flex; gap: 12px; margin-bottom: 48px; }
         .nav-btn { 
-            padding: 14px 28px; 
-            border-radius: 12px; 
-            border: 2px solid rgba(255,255,255,0.1); 
-            cursor: pointer; 
-            font-weight: 600; 
-            background: rgba(255,255,255,0.05);
-            color: #b2dfdb;
+            padding: 14px 28px; border-radius: 12px; border: none; cursor: pointer; font-weight: 600; 
+            background: rgba(255,255,255,0.05); color: #b2dfdb; transition: all 0.2s;
         }
-        .nav-btn.active { 
-            background: rgba(74, 124, 89, 0.4); 
-            color: white; 
-            border-color: rgba(74, 124, 89, 0.6);
-        }
-        h1 { 
-            font-size: clamp(2.5rem, 6vw, 4.5rem); 
-            font-weight: 800;
-            background: linear-gradient(135deg, #e8f5e9 0%, #90be6d 100%); 
-            -webkit-background-clip: text; 
-            -webkit-text-fill-color: transparent; 
-            margin-bottom: 16px;
-        }
+        .nav-btn.active { background: rgba(74, 124, 89, 0.4); color: white; box-shadow: 0 4px 15px rgba(0,0,0,0.2); }
+        h1 { font-size: clamp(2.5rem, 6vw, 4rem); font-weight: 800; background: linear-gradient(135deg, #e8f5e9 0%, #90be6d 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
         .mono { font-family: 'Space Mono', monospace; }
-        .badge {
-            display: inline-block;
-            padding: 6px 14px;
-            background: rgba(74, 124, 89, 0.2);
-            border: 1px solid rgba(74, 124, 89, 0.3);
-            border-radius: 20px;
-            font-size: 12px;
-            color: #90be6d;
-            margin-bottom: 20px;
-        }
+        .bar-container { display: flex; align-items: flex-end; gap: 10px; height: 300px; padding-top: 40px; margin-top: 20px; }
+        .bar-item { flex: 1; display: flex; flexDirection: column; align-items: center; gap: 10px; }
+        .bar { width: 100%; background: #90be6d; border-radius: 8px 8px 0 0; transition: height 1s ease-out; position: relative; min-height: 2px; }
+        .bar:hover { background: #4a7c59; }
+        .bar-val { position: absolute; top: -25px; width: 100%; text-align: center; font-size: 12px; font-weight: bold; }
     </style>
 </head>
 <body>
     <div id="root"></div>
 
     <script type="text/babel">
-        // Custom SVG Chart Component (Zero Dependencies)
-        const SimpleAreaChart = ({ data }) => {
-            const width = 1000;
-            const height = 400;
-            const padding = 40;
+        const BarChart = ({ data }) => {
+            const max = Math.max(...data.map(d => d.val));
+            const min = Math.min(...data.map(d => d.val)) * 0.99;
             
-            const minVal = 161000;
-            const maxVal = 165000;
-            const range = maxVal - minVal;
-            
-            const points = data.map((d, i) => {
-                const x = (i / (data.length - 1)) * (width - padding * 2) + padding;
-                const y = height - ((d.val - minVal) / range) * (height - padding * 2) - padding;
-                return { x, y };
-            });
-            
-            const pathData = `M ${points[0].x} ${points[0].y} ` + 
-                points.slice(1).map(p => `L ${p.x} ${p.y}`).join(' ') +
-                ` L ${points[points.length-1].x} ${height} L ${points[0].x} ${height} Z`;
-                
-            const lineData = `M ${points[0].x} ${points[0].y} ` + 
-                points.slice(1).map(p => `L ${p.x} ${p.y}`).join(' ');
-
             return (
-                <svg viewBox={`0 0 ${width} ${height}`} width="100%" height="100%" preserveAspectRatio="none">
-                    <defs>
-                        <linearGradient id="grad" x1="0" y1="0" x2="0" y2="1">
-                            <stop offset="0%" stopColor="#90be6d" stopOpacity="0.4" />
-                            <stop offset="100%" stopColor="#4a7c59" stopOpacity="0.05" />
-                        </linearGradient>
-                    </defs>
-                    <path d={pathData} fill="url(#grad)" />
-                    <path d={lineData} fill="none" stroke="#90be6d" strokeWidth="4" />
-                    {points.map((p, i) => (
-                        <g key={i}>
-                            <circle cx={p.x} cy={p.y} r="6" fill="#90be6d" />
-                            <text x={p.x} y={height - 10} textAnchor="middle" fill="#b2dfdb" fontSize="14" className="mono">{data[i].name}</text>
-                            <text x={p.x} y={p.y - 15} textAnchor="middle" fill="white" fontSize="16" fontWeight="bold" className="mono">{data[i].val.toLocaleString()}</text>
-                        </g>
-                    ))}
-                </svg>
+                <div className="bar-container">
+                    {data.map((d, i) => {
+                        const height = ((d.val - min) / (max - min)) * 100;
+                        return (
+                            <div key={i} className="bar-item">
+                                <div className="bar" style={{ height: `${Math.max(height, 5)}%` }}>
+                                    <div className="bar-val mono">{d.val.toLocaleString()}</div>
+                                </div>
+                                <div className="mono" style={{fontSize: '12px', color: '#b2dfdb'}}>{d.name}</div>
+                            </div>
+                        );
+                    })}
+                </div>
             );
         };
 
         function Dashboard() {
             const [tab, setTab] = React.useState('overview');
-            
             const data = [
                 { name: '2019', val: 164500 }, { name: '2020', val: 163800 },
                 { name: '2021', val: 163200 }, { name: '2022', val: 162800 },
@@ -125,19 +80,16 @@
             return (
                 <div className="container">
                     <header style={{marginBottom: '50px'}}>
-                        <div className="badge mono">TILANNE- JA KEHITYSKUVA 2024</div>
-                        <h1>Pohjois-Karjala <span style={{fontSize: '1rem', opacity: 0.5}}>v1.1</span></h1>
-                        <p style={{fontSize: '1.4rem', color: '#b2dfdb', fontWeight: '300', maxWidth: '800px'}}>Visuaalinen katsaus maakunnan väestöön, talouteen ja ympäristöön.</p>
+                        <div style={{background: '#4a7c59', color: 'white', padding: '10px 20px', borderRadius: '10px', display: 'inline-block', marginBottom: '20px', fontWeight: 'bold'}}>
+                            FIXED v1.4 - Please Hard Refresh (Cmd+Shift+R)
+                        </div>
+                        <h1>Pohjois-Karjala</h1>
+                        <p style={{fontSize: '1.2rem', color: '#b2dfdb', fontWeight: '300'}}>Visuaalinen katsaus maakunnan kehitykseen</p>
                     </header>
 
                     <div className="nav">
-                        {['overview', 'population', 'economy', 'story'].map(t => (
-                            <button key={t} className={`nav-btn ${tab === t ? 'active' : ''}`} onClick={() => setTab(t)}>
-                                {t === 'overview' ? '📊 Yleiskuva' : 
-                                 t === 'population' ? '👥 Väestö' : 
-                                 t === 'economy' ? '💼 Talous' : '✨ Projektin tarina'}
-                            </button>
-                        ))}
+                        <button className={`nav-btn ${tab === 'overview' ? 'active' : ''}`} onClick={() => setTab('overview')}>📊 Tilastot</button>
+                        <button className={`nav-btn ${tab === 'story' ? 'active' : ''}`} onClick={() => setTab('story')}>✨ Projektin tarina</button>
                     </div>
 
                     {tab === 'overview' && (
@@ -146,63 +98,36 @@
                                 <div className="card">
                                     <div style={{color: '#b2dfdb', fontSize: '14px', marginBottom: '10px'}}>VÄESTÖ</div>
                                     <div style={{fontSize: '3rem', fontWeight: '800'}} className="mono">162 202</div>
-                                    <div style={{color: '#e76f51', fontSize: '14px', marginTop: '5px'}}>▼ -0,1% lasku</div>
+                                    <div style={{color: '#e76f51', fontSize: '14px'}}>▼ -0,1% lasku</div>
                                 </div>
                                 <div className="card">
                                     <div style={{color: '#b2dfdb', fontSize: '14px', marginBottom: '10px'}}>UUSIUTUVA ENERGIA</div>
                                     <div style={{fontSize: '3rem', fontWeight: '800'}} className="mono">72%</div>
-                                    <div style={{color: '#90be6d', fontSize: '14px', marginTop: '5px'}}>▲ Omavaraisuus 69%</div>
-                                </div>
-                                <div className="card">
-                                    <div style={{color: '#b2dfdb', fontSize: '14px', marginBottom: '10px'}}>PÄÄSTÖVÄHENNYS</div>
-                                    <div style={{fontSize: '3rem', fontWeight: '800'}} className="mono">44%</div>
-                                    <div style={{color: '#2a9d8f', fontSize: '14px', marginTop: '5px'}}>Tavoite 80%</div>
+                                    <div style={{color: '#90be6d', fontSize: '14px'}}>▲ Omavaraisuus 69%</div>
                                 </div>
                             </div>
-                            
                             <div className="card">
-                                <h3 style={{marginBottom: '30px', fontSize: '1.5rem'}}>Väestön kehityssuunta</h3>
-                                <div style={{ height: '400px' }}>
-                                    <SimpleAreaChart data={data} />
-                                </div>
+                                <h3 style={{marginBottom: '10px'}}>Väestön kehitys (2019-2024)</h3>
+                                <BarChart data={data} />
                             </div>
                         </div>
                     )}
 
                     {tab === 'story' && (
-                        <div style={{display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '24px'}}>
+                        <div style={{display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '24px'}}>
                             {[
-                                { step: '01', t: 'DATA-ANALYYSI', d: 'Pohjois-Karjalan liiton PDF-raportti analysoitiin tekoälyllä maakunnan tilannekuvan luomiseksi.', c: '#f4a261' },
-                                { step: '02', t: 'AI-KEHITYS', d: 'Claude 4.5 Sonnet muunsi monimutkaiset tilastot visuaaliseksi React-pohjaiseksi koodiksi.', c: '#2a9d8f' },
-                                { step: '03', t: 'CURSOR IDE', d: 'Cursorin ja tekoälyparin avulla koodi hiottiin ja projektinhallinta automatisoitiin.', c: '#4a7c59' },
-                                { step: '04', t: 'VERCEL LIVE', d: 'Projekti on julkaistu Vercelin kautta, mikä mahdollistaa välittömän saavutettavuuden.', c: '#8ecae6' }
+                                { t: 'VAIHE 1: Data', d: 'Pohjois-Karjalan liiton PDF-raportti.', c: '#f4a261' },
+                                { t: 'VAIHE 2: AI', d: 'Claude 4.5 Sonnet koodasi dashboardin.', c: '#2a9d8f' },
+                                { t: 'VAIHE 3: Työkalut', d: 'Cursor IDE ja Git-automaatio.', c: '#4a7c59' },
+                                { t: 'VAIHE 4: Live', d: 'Vercel-julkaisu.', c: '#8ecae6' }
                             ].map((item, i) => (
-                                <div key={i} className="card" style={{display: 'flex', flexDirection: 'column', gap: '15px'}}>
-                                    <div className="mono" style={{color: item.c, fontSize: '14px', fontWeight: '700'}}>{item.step} —</div>
-                                    <h3 style={{fontSize: '1.5rem', fontWeight: '700'}}>{item.t}</h3>
-                                    <p style={{lineHeight: '1.8', color: '#b2dfdb', flexGrow: 1}}>{item.d}</p>
+                                <div key={i} className="card">
+                                    <h3 style={{color: item.c, marginBottom: '15px'}}>{item.t}</h3>
+                                    <p style={{color: '#b2dfdb', lineHeight: '1.6'}}>{item.d}</p>
                                 </div>
                             ))}
                         </div>
                     )}
-
-                    {tab === 'population' && (
-                        <div className="card">
-                            <h3 style={{marginBottom: '20px'}}>Väestörakenteen haasteet</h3>
-                            <p style={{lineHeight: '1.8', color: '#b2dfdb'}}>Pohjois-Karjalan väestörakenteen suurin haaste on ikääntyminen ja syntyvyyden lasku. Vuonna 2023 syntyi vain 1 002 lasta, mikä on historiallisen vähän.</p>
-                        </div>
-                    )}
-
-                    {tab === 'economy' && (
-                        <div className="card">
-                            <h3 style={{marginBottom: '20px'}}>Talous ja työllisyys</h3>
-                            <p style={{lineHeight: '1.8', color: '#b2dfdb'}}>Maakunnan työttömyysaste on ollut maan korkeimpia, ollen 13,1% lokakuussa 2024. Samaan aikaan puhtaan siirtymän investoinnit ja NATO-jäsenyys tuovat uusia mahdollisuuksia.</p>
-                        </div>
-                    )}
-
-                    <footer style={{marginTop: '100px', padding: '40px 0', borderTop: '1px solid rgba(255,255,255,0.05)', textAlign: 'center', color: '#607d8b'}}>
-                        <p className="mono" style={{fontSize: '12px'}}>LÄHDE: POHJOIS-KARJALAN TILANNE- JA KEHITYSKUVA (2024)</p>
-                    </footer>
                 </div>
             );
         }
