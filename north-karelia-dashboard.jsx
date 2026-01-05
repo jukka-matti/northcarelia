@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { LineChart, Line, BarChart, Bar, PieChart, Pie, Cell, AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
-import { TrendingDown, Users, Briefcase, Heart, Leaf, AlertCircle, TrendingUp } from 'lucide-react';
+import { TrendingDown, Users, Briefcase, Heart, Leaf, AlertCircle, TrendingUp, Sparkles, FileText, Cpu, Code, Globe } from 'lucide-react';
 
 export default function NorthKareliaDashboard() {
   const [activeSection, setActiveSection] = useState('overview');
@@ -82,7 +82,8 @@ export default function NorthKareliaDashboard() {
     { id: 'population', label: 'Väestö', icon: '👥' },
     { id: 'economy', label: 'Talous', icon: '💼' },
     { id: 'wellbeing', label: 'Hyvinvointi', icon: '❤️' },
-    { id: 'environment', label: 'Ympäristö', icon: '🌲' }
+    { id: 'environment', label: 'Ympäristö', icon: '🌲' },
+    { id: 'about', label: 'Projektin tarina', icon: '✨' }
   ];
 
   return (
@@ -887,6 +888,133 @@ export default function NorthKareliaDashboard() {
                   <div style={{ color: '#90be6d', fontWeight: '600' }}>Kriittinen yhteys</div>
                 </div>
               </div>
+            </div>
+          </div>
+        )}
+
+        {/* About Section */}
+        {activeSection === 'about' && (
+          <div style={{ animation: 'fadeIn 0.5s ease-out' }}>
+            <h2 style={{
+              fontSize: '2.5rem',
+              fontWeight: '700',
+              marginBottom: '32px',
+              color: '#e8f5e9'
+            }}>
+              ✨ Projektin tarina: Datasta visioksi
+            </h2>
+
+            <div style={{
+              display: 'grid',
+              gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
+              gap: '24px',
+              marginBottom: '48px'
+            }}>
+              {[
+                {
+                  step: 'VAIHE 1',
+                  title: 'Lähdeaineisto',
+                  desc: 'Pohjois-Karjalan liiton PDF-raportti (2025) tarjosi valtavan määrän tekstiä ja taulukoita maakunnan tilanteesta.',
+                  icon: FileText,
+                  color: '#f4a261',
+                  tags: ['PDF', 'Data', 'Tilannekuva']
+                },
+                {
+                  step: 'VAIHE 2',
+                  title: 'AI-Suunnittelu',
+                  desc: 'Claude 4.5 Sonnet analysoi raportin ja loi koodin, joka muuttaa numerot ja tekstin visuaaliseksi tarinaksi.',
+                  icon: Cpu,
+                  color: '#2a9d8f',
+                  tags: ['Claude 4.5', 'Prompt Engineering', 'React']
+                },
+                {
+                  step: 'VAIHE 3',
+                  title: 'Kehitystyö',
+                  desc: 'Cursor IDE:n avulla koodi hiottiin, Git-repo alustettiin ja projekti valmisteltiin julkaisuun sekunneissa.',
+                  icon: Code,
+                  color: '#4a7c59',
+                  tags: ['Cursor', 'Git', 'Pair Programming']
+                },
+                {
+                  step: 'VAIHE 4',
+                  title: 'Julkaisu',
+                  desc: 'Automaattinen CI/CD-putki Verceliin. Projekti on nyt livenä ja kaikkien tarkasteltavissa.',
+                  icon: Globe,
+                  color: '#8ecae6',
+                  tags: ['Vercel', 'Live', 'Deployment']
+                }
+              ].map((item, index) => {
+                const Icon = item.icon;
+                return (
+                  <div
+                    key={index}
+                    className="chart-container"
+                    style={{
+                      padding: '32px',
+                      display: 'flex',
+                      flexDirection: 'column',
+                      gap: '16px',
+                      animation: `slideIn 0.6s ease-out ${index * 0.1}s both`
+                    }}
+                  >
+                    <div style={{
+                      fontFamily: "'Space Mono', monospace",
+                      fontSize: '12px',
+                      color: item.color,
+                      letterSpacing: '2px',
+                      fontWeight: '700'
+                    }}>
+                      {item.step}
+                    </div>
+                    
+                    <div style={{
+                      width: '48px',
+                      height: '48px',
+                      background: `${item.color}22`,
+                      borderRadius: '12px',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center'
+                    }}>
+                      <Icon size={24} color={item.color} />
+                    </div>
+
+                    <h3 style={{ fontSize: '1.5rem', fontWeight: '600', color: '#e8f5e9' }}>
+                      {item.title}
+                    </h3>
+
+                    <p style={{ color: '#b2dfdb', lineHeight: '1.6', flexGrow: 1 }}>
+                      {item.desc}
+                    </p>
+
+                    <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', marginTop: '12px' }}>
+                      {item.tags.map(tag => (
+                        <span key={tag} style={{
+                          fontSize: '10px',
+                          padding: '4px 8px',
+                          background: 'rgba(255,255,255,0.05)',
+                          borderRadius: '4px',
+                          color: '#b2dfdb',
+                          border: '1px solid rgba(255,255,255,0.1)'
+                        }}>
+                          {tag}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+
+            <div className="chart-container" style={{ padding: '40px', textAlign: 'center' }}>
+              <Sparkles size={48} color="#90be6d" style={{ marginBottom: '24px' }} />
+              <h3 style={{ fontSize: '2rem', marginBottom: '16px' }}>Tulevaisuuden kehitystapa</h3>
+              <p style={{ maxWidth: '800px', margin: '0 auto', lineHeight: '1.8', color: '#b2dfdb', fontSize: '1.1rem' }}>
+                Tämä dashboard ei ole vain tilastoja, vaan esimerkki siitä, kuinka tekoälyavusteinen 
+                kehitys mahdollistaa monimutkaisen tiedon nopean visualisoinnin ja saavutettavuuden. 
+                Se, mikä ennen vei päiviä suunnittelussa ja koodauksessa, on nyt mahdollista toteuttaa 
+                lähes välittömästi säilyttäen silti korkean laadun ja visualisuuden.
+              </p>
             </div>
           </div>
         )}
