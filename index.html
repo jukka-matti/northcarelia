@@ -5,11 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Pohjois-Karjala - Dashboard</title>
     
+    <!-- React -->
     <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
     <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
-    <script src="https://unpkg.com/prop-types@15.8.1/prop-types.min.js"></script>
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
-    <script src="https://unpkg.com/recharts@2.12.7/dist/Recharts.min.js"></script>
 
     <style>
         @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@300;400;500;600;700&family=Space+Mono:wght@400;700&display=swap');
@@ -29,9 +28,7 @@
             margin-bottom: 24px; 
             border: 1px solid rgba(255,255,255,0.1); 
             backdrop-filter: blur(20px);
-            transition: transform 0.3s ease;
         }
-        .card:hover { transform: translateY(-5px); background: rgba(255,255,255,0.05); }
         .nav { display: flex; gap: 12px; margin-bottom: 48px; flex-wrap: wrap; }
         .nav-btn { 
             padding: 14px 28px; 
@@ -41,13 +38,11 @@
             font-weight: 600; 
             background: rgba(255,255,255,0.05);
             color: #b2dfdb;
-            transition: all 0.2s;
         }
         .nav-btn.active { 
             background: rgba(74, 124, 89, 0.4); 
             color: white; 
             border-color: rgba(74, 124, 89, 0.6);
-            box-shadow: 0 8px 20px rgba(0,0,0,0.2);
         }
         h1 { 
             font-size: clamp(2.5rem, 6vw, 4.5rem); 
@@ -56,7 +51,6 @@
             -webkit-background-clip: text; 
             -webkit-text-fill-color: transparent; 
             margin-bottom: 16px;
-            line-height: 1.1;
         }
         .mono { font-family: 'Space Mono', monospace; }
         .badge {
@@ -66,10 +60,8 @@
             border: 1px solid rgba(74, 124, 89, 0.3);
             border-radius: 20px;
             font-size: 12px;
-            font-weight: 600;
-            letter-spacing: 1px;
-            margin-bottom: 20px;
             color: #90be6d;
+            margin-bottom: 20px;
         }
     </style>
 </head>
@@ -77,50 +69,70 @@
     <div id="root"></div>
 
     <script type="text/babel">
+        // Custom SVG Chart Component (Zero Dependencies)
+        const SimpleAreaChart = ({ data }) => {
+            const width = 1000;
+            const height = 400;
+            const padding = 40;
+            
+            const minVal = 161000;
+            const maxVal = 165000;
+            const range = maxVal - minVal;
+            
+            const points = data.map((d, i) => {
+                const x = (i / (data.length - 1)) * (width - padding * 2) + padding;
+                const y = height - ((d.val - minVal) / range) * (height - padding * 2) - padding;
+                return { x, y };
+            });
+            
+            const pathData = `M ${points[0].x} ${points[0].y} ` + 
+                points.slice(1).map(p => `L ${p.x} ${p.y}`).join(' ') +
+                ` L ${points[points.length-1].x} ${height} L ${points[0].x} ${height} Z`;
+                
+            const lineData = `M ${points[0].x} ${points[0].y} ` + 
+                points.slice(1).map(p => `L ${p.x} ${p.y}`).join(' ');
+
+            return (
+                <svg viewBox={`0 0 ${width} ${height}`} width="100%" height="100%" preserveAspectRatio="none">
+                    <defs>
+                        <linearGradient id="grad" x1="0" y1="0" x2="0" y2="1">
+                            <stop offset="0%" stopColor="#90be6d" stopOpacity="0.4" />
+                            <stop offset="100%" stopColor="#4a7c59" stopOpacity="0.05" />
+                        </linearGradient>
+                    </defs>
+                    <path d={pathData} fill="url(#grad)" />
+                    <path d={lineData} fill="none" stroke="#90be6d" strokeWidth="4" />
+                    {points.map((p, i) => (
+                        <g key={i}>
+                            <circle cx={p.x} cy={p.y} r="6" fill="#90be6d" />
+                            <text x={p.x} y={height - 10} textAnchor="middle" fill="#b2dfdb" fontSize="14" className="mono">{data[i].name}</text>
+                            <text x={p.x} y={p.y - 15} textAnchor="middle" fill="white" fontSize="16" fontWeight="bold" className="mono">{data[i].val.toLocaleString()}</text>
+                        </g>
+                    ))}
+                </svg>
+            );
+        };
+
         function Dashboard() {
             const [tab, setTab] = React.useState('overview');
-            const [libsReady, setLibsReady] = React.useState(false);
-
-            React.useEffect(() => {
-                const interval = setInterval(() => {
-                    if (window.Recharts && window.Recharts.AreaChart) {
-                        setLibsReady(true);
-                        clearInterval(interval);
-                    }
-                }, 100);
-                return () => clearInterval(interval);
-            }, []);
-
+            
             const data = [
                 { name: '2019', val: 164500 }, { name: '2020', val: 163800 },
                 { name: '2021', val: 163200 }, { name: '2022', val: 162800 },
                 { name: '2023', val: 162321 }, { name: '2024', val: 162202 }
             ];
 
-            // Local aliases for Recharts components
-            const AreaChart = window.Recharts ? window.Recharts.AreaChart : null;
-            const Area = window.Recharts ? window.Recharts.Area : null;
-            const XAxis = window.Recharts ? window.Recharts.XAxis : null;
-            const YAxis = window.Recharts ? window.Recharts.YAxis : null;
-            const CartesianGrid = window.Recharts ? window.Recharts.CartesianGrid : null;
-            const Tooltip = window.Recharts ? window.Recharts.Tooltip : null;
-            const ResponsiveContainer = window.Recharts ? window.Recharts.ResponsiveContainer : null;
-
             return (
                 <div className="container">
                     <header style={{marginBottom: '50px'}}>
                         <div className="badge mono">TILANNE- JA KEHITYSKUVA 2024</div>
-                        <h1>Pohjois-Karjala</h1>
+                        <h1>Pohjois-Karjala <span style={{fontSize: '1rem', opacity: 0.5}}>v1.1</span></h1>
                         <p style={{fontSize: '1.4rem', color: '#b2dfdb', fontWeight: '300', maxWidth: '800px'}}>Visuaalinen katsaus maakunnan väestöön, talouteen ja ympäristöön.</p>
                     </header>
 
                     <div className="nav">
                         {['overview', 'population', 'economy', 'story'].map(t => (
-                            <button 
-                                key={t}
-                                className={`nav-btn ${tab === t ? 'active' : ''}`} 
-                                onClick={() => setTab(t)}
-                            >
+                            <button key={t} className={`nav-btn ${tab === t ? 'active' : ''}`} onClick={() => setTab(t)}>
                                 {t === 'overview' ? '📊 Yleiskuva' : 
                                  t === 'population' ? '👥 Väestö' : 
                                  t === 'economy' ? '💼 Talous' : '✨ Projektin tarina'}
@@ -132,17 +144,17 @@
                         <div>
                             <div style={{display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '24px', marginBottom: '32px'}}>
                                 <div className="card">
-                                    <div style={{color: '#b2dfdb', fontSize: '14px', marginBottom: '10px', fontWeight: '500'}}>VÄESTÖ</div>
+                                    <div style={{color: '#b2dfdb', fontSize: '14px', marginBottom: '10px'}}>VÄESTÖ</div>
                                     <div style={{fontSize: '3rem', fontWeight: '800'}} className="mono">162 202</div>
                                     <div style={{color: '#e76f51', fontSize: '14px', marginTop: '5px'}}>▼ -0,1% lasku</div>
                                 </div>
                                 <div className="card">
-                                    <div style={{color: '#b2dfdb', fontSize: '14px', marginBottom: '10px', fontWeight: '500'}}>UUSIUTUVA ENERGIA</div>
+                                    <div style={{color: '#b2dfdb', fontSize: '14px', marginBottom: '10px'}}>UUSIUTUVA ENERGIA</div>
                                     <div style={{fontSize: '3rem', fontWeight: '800'}} className="mono">72%</div>
                                     <div style={{color: '#90be6d', fontSize: '14px', marginTop: '5px'}}>▲ Omavaraisuus 69%</div>
                                 </div>
                                 <div className="card">
-                                    <div style={{color: '#b2dfdb', fontSize: '14px', marginBottom: '10px', fontWeight: '500'}}>PÄÄSTÖVÄHENNYS</div>
+                                    <div style={{color: '#b2dfdb', fontSize: '14px', marginBottom: '10px'}}>PÄÄSTÖVÄHENNYS</div>
                                     <div style={{fontSize: '3rem', fontWeight: '800'}} className="mono">44%</div>
                                     <div style={{color: '#2a9d8f', fontSize: '14px', marginTop: '5px'}}>Tavoite 80%</div>
                                 </div>
@@ -151,23 +163,7 @@
                             <div className="card">
                                 <h3 style={{marginBottom: '30px', fontSize: '1.5rem'}}>Väestön kehityssuunta</h3>
                                 <div style={{ height: '400px' }}>
-                                    {libsReady && AreaChart ? (
-                                        <ResponsiveContainer width="100%" height="100%">
-                                            <AreaChart data={data}>
-                                                <defs>
-                                                    <linearGradient id="colorVal" x1="0" y1="0" x2="0" y2="1">
-                                                        <stop offset="5%" stopColor="#4a7c59" stopOpacity={0.8}/>
-                                                        <stop offset="95%" stopColor="#4a7c59" stopOpacity={0.05}/>
-                                                    </linearGradient>
-                                                </defs>
-                                                <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" />
-                                                <XAxis dataKey="name" stroke="#b2dfdb" />
-                                                <YAxis hide domain={['161000', '165000']} />
-                                                <Tooltip contentStyle={{background: '#0a1e1e', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '15px'}} />
-                                                <Area type="monotone" dataKey="val" stroke="#90be6d" fillOpacity={1} fill="url(#colorVal)" strokeWidth={4} />
-                                            </AreaChart>
-                                        </ResponsiveContainer>
-                                    ) : <div style={{textAlign: 'center', padding: '100px'}}>Ladataan visualisointia...</div>}
+                                    <SimpleAreaChart data={data} />
                                 </div>
                             </div>
                         </div>
